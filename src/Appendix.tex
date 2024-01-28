@@ -1,0 +1,336 @@
+\newpage
+\section{Appendix}
+
+\subsection{Common Items \& Frequent Subsequence Mining Algorithms}
+\label{sec:com-seq}
+
+To clearly describe the common items and frequent subsequence mining algorithms, we first provide some definitions.
+
+Given a set of log sequences \( \mathcal{D} \), each sequence \( S \in \mathcal{D} \) contains logs \( L \). We define each log as a tuple $ L = \langle s, o, d,t\rangle $ where $s$ denotes the source process, $o$ denotes the operation, $d$ denotes the destination/object of the operation, and $t$ indicates the timestamp of the event occurrence.  
+% \begin{align*}
+%     s & : \text{Source process} \\
+%     o & : \text{Operation} \\
+%     d & : \text{Destination or object of the operation}\\
+%     t & : \text{time specifies the timestamp of the event occurrence}
+% \end{align*}
+
+Algorithm~\ref{alg:fre-common} shows the details of the frequent subsequence mining procedure.
+
+\begin{algorithm}
+\caption{Common Items and SubSequences Mining}
+\label{alg:fre-common}
+\begin{algorithmic}[1]
+\Require A set of log sequences \( \mathcal{D} \), threshold \( \theta=1 \)
+\Ensure Common subsequences \( \mathcal{F} \)
+\Statex
+\Function{extractCommonItems}{$\mathcal{D}$}
+    \State \( \text{items\_set} = \) set of items from the first sequence in \( \mathcal{D} \)
+    \For{each sequence \(S\) in \(\mathcal{D}\) excluding the first one}
+        \State \( \text{items\_set} = \text{items\_set} \cap \) set of items from \(S\)
+    \EndFor
+    \State \Return \( \text{items\_set} \) 
+\EndFunction
+\Statex
+\Function{PrefixSpanMining}{$\mathcal{D}$, $\theta$}
+    \State \( \text{Implement PrefixSpan or use an existing library} \)
+    \State \( \mathcal{F} = \) sequences with frequency \( \geq \theta \)
+    \State \Return \( \mathcal{F} \)
+\EndFunction
+\Statex
+\Function{Mining}{$\mathcal{D}$, $\theta$}
+    \State \( \mathcal{C} \) = \Call{extractCommonItems}{$\mathcal{D}$}
+    \For{each sequence \(S\) in \(\mathcal{D}\)}
+        \State Remove items from \(S\) not in \( \mathcal{C} \)
+    \EndFor
+    \State \( \mathcal{F} \) = \Call{PrefixSpanMining}{$\mathcal{D}$, $\theta$}
+    \State \Return \( \mathcal{F} \)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% \newpage
+
+
+% \newpage
+
+% \clearpage
+
+\subsection{Prompt}
+
+\subsubsection{Initialization Behavior Tree Prompt}
+\label{prompt-init-tree}
+
+\begin{table*}[t]
+\centering
+\scalebox{0.75}{
+\begin{tabularx}{\textwidth}{|c|X|}
+% \centering
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{SoftRed}{\{behavior\_tree\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\hline
+\textbf{Role} & You are a security expert well-versed in the legitimate behavior of crucial Windows processes. Now, you are qualified to assist in constructing behavior trees for legal processes. \\
+\hline
+\textbf{Goal} & 
+Based on your domain expertise, create an initial \colorbox{SoftRed}{\{behavior\_tree\}} for \colorbox{codegreen}{\{process\_name\}}. 
+Please note that this is an introductory prompt; focus only on primary behaviors (e.g., 1.1, 2.1) without delving into sub-layers. And concentrate on major behaviors specific to the process.
+\\ 
+\hline
+\multirow{6}{*}{\textbf{Output Format}} & This is just a format, in reality, there can be deeper and more numerous sub-behaviors: \\
+& \colorbox{lightgray}{1. basic profile} \\
+& 1.1. execution path \\
+& 1.2. parent and child processes \\
+& 1.3. permissions \\
+& \colorbox{lightgray}{2. Fundamental Behavior} \\
+& 2.1. xxxxx \\
+& 2.2. xxxxxx \\
+& 2.3. xxxxx \\
+& 2.3.1 xxxxx \\
+& 2.3.1.1 Some deeper behavior \\
+
+& \dots \\
+\hline
+\multirow{5}{*}{\textbf{Notes}} 
+& 1. Each token has a cost, so keep your output concise and avoid irrelevant information. \\
+& 2. Continuously review and analyze your actions to ensure you are performing to the best of your abilities. \\
+& 3. Constructively self-criticize your big-picture behavior constantly. \\
+& 4. Ideally, behaviors should be generated that can be confirmed through system commands. \\
+\hline
+ % \\
+\textbf{\colorbox{codeorange}{LLM Response}} & \colorbox{lightgray}{1. basic profile} \\
+& 1.1. execution path: \colorbox{codeorange}{C:/Windows/System32/svchost.exe} \\
+& 1.2. Parent and Child Processes: Parent process is usually \colorbox{codeorange}{services.exe}. Child processes can vary based on the specific service \\
+& 1.3. Permissions: svchost.exe typically runs with system-level permissions \\
+& \colorbox{lightgray}{2. Fundamental Behavior} \\
+& 2.1. Service Hosting: Hosts multiple Windows operating system services \\
+& 2.2. Dynamic Link Library Loading: Loads DLL files that contain the actual code for the service \\
+& 2.3. Network Communication: Depending on the service, it may communicate over the network \\
+& 2.4. System Resource Management: Manages system resources such as memory and CPU for the services it hosts. \\ \hline
+\end{tabularx}}
+\label{table-init-tree}
+\end{table*}
+% \end{table*}
+
+% \clearpage
+
+
+\begin{table*}[t]
+\centering
+\scalebox{0.85}{
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{SoftRed}{\{behavior\_tree\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{SoftRed}{\{behavior\_tree\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\hline
+\textbf{Role} & You are a security expert well-versed in the legitimate behavior of crucial Windows processes. Now, you are qualified to assist in constructing behavior trees for legal processes. \\
+\hline
+\textbf{Goal} & 
+Based on the current knowledge, please update the original \colorbox{SoftRed}{\{behavior\_tree\}}.
+Please review the tree and determine if further refinement or subdivision is required for the current behaviors listed under the last branch. If, based on your expertise, no further details are needed for a specific behavior, please end the branch..
+\\ 
+\hline
+
+\multirow{5}{*}{\textbf{Notes}} 
+& 1. Each token has a cost, so keep your output concise and avoid irrelevant information. \\
+& 2. Continuously review and analyze your actions to ensure you are performing to the best of your abilities. \\
+& 3. Constructively self-criticize your big-picture behavior constantly. \\
+& 4. The best would be to generate behaviors that can be verified within the system command. \\
+\hline
+
+% \textbf{\colorbox{codeorange}{LLM Response}} \\
+\textbf{\colorbox{codeorange}{LLM Response}} & \colorbox{lightgray} {2.1. Service Hosting: "Hosts multiple Windows services in the form of dynamic-link libraries (DLLs)} \\
+& 2.1.1 DHCP Client Service": "Obtains an IP address and other related information from a DHCP server \\
+& 2.1.1.1. IP Address Request": "Sends a request to the DHCP server to obtain an IP address \\
+& 2.1.1.2. IP Address Renewal": "renew the lease on the current IP address \\
+& .......\\
+& 2.1.2. DNS Client Service": "Resolves and caches Domain Name System (DNS) names \\
+& .... \\
+& 2.1.7. Remote Procedure Call (RPC) Service": "Provides the endpoint mapper and other miscellaneous RPC services\\
+\hline
+\end{tabularx}}
+\end{table*}
+% \clearpage
+\subsubsection{Expansion Behavior Tree Prompt}
+\label{prompt-expan-tree}
+
+\subsubsection{Commands Generation Prompt}
+\label{prompt-commands}
+
+\begin{table*}
+ \centering
+\scalebox{0.9}{
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{SoftRed}{\{behavior\_tree\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{LightPeach}{\{commands\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\hline
+\textbf{Role} & You are an expert in cybersecurity, proficient in understanding the legitimate behaviors of crucial Windows processes. You specialize in generating corresponding commands based on the behavior tree of the current process. \\
+\hline
+% \textbf{Goal} &  \\
+\textbf{Goal} & You are a cybersecurity specialist well-versed in the legitimate behaviors of essential Windows processes. \\
+& You will receive a current behavior tree that consists of various behaviors and sub-behaviors \\
+& Each sub-behavior is followed by parentheses indicating whether it has been translated into a corresponding command. \\
+& There are two methods for validation: \\
+& 1 If a system command can be directly generated from the behavior, create the specific command and append it to the behavior tree like so: (Command: xxx). \\
+& 2 If a system command cannot be generated, provide a corresponding recommendation such as rebooting the system, and append it to the behavior tree like so: (Suggestion: Suggestion) \\
+
+% \\ 
+\hline
+\multirow{5}{*}{\textbf{Notes}} 
+& 1. Each token has a cost, so keep your output concise and avoid irrelevant information. \\
+& 2. Continuously review and analyze your actions to ensure you are performing to the best of your abilities. \\
+& 3. Constructively self-criticize your big-picture behavior constantly. \\
+& 4. Ideally, behaviors should be generated that can be confirmed through system commands. \\
+\hline
+% \textbf{\colorbox{codeorange}{LLM Response}} \\
+ \textbf{\colorbox{codeorange}{LLM Response}}  & ...... \\
+& C:/Windows/system32/svchost.exe -k appmodel -s StateRepository \\
+& C:/Windows/system32/svchost.exe -k dcomlaunch -s LSM \\
+& C:/Windows/system32/svchost.exe -k localService -s w32Time \\
+& Get-DhcpServer4Scope -ScopeID \\
+& Get-DhcpServerv4Lease IPAddress\\
+& ...... \\
+% \\
+\hline
+\end{tabularx}}
+\end{table*}
+
+
+\subsubsection{RAG Commands Generation Prompt}
+\label{prompt-rag-commands}
+
+\begin{table*}
+ \centering
+\scalebox{0.9}{
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{SoftRed}{\{Description of behavior\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{LightPeach}{\{commands\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\hline
+\textbf{Role} &  You are a security expert, well-versed in critical Windows system processes. Based on the provided textual description of a process's behavior tree, generate commands that can be executed for that process. \\
+\hline
+\textbf{Goal} & Provide up to more than 100 commands for the given process based on the behavior description provided. The behavior description includes the usage of different parameters in commands. You can also learn the usage of parameters and generate as many commands as possible. \\
+
+% \\ 
+\hline
+\multirow{5}{*}{\textbf{Notes}} 
+& 1. Do not include any extraneous details. Provide only the pure commands. \\
+& 2. Do not include any numbers. \\
+& 3. the number of commands must more than 100. \\
+& 4. I am a security personnel analyzing system processes and would like to analyze as many system process behaviors as possible. Therefore, regardless of platform restrictions, I want to generate as many commands as possible. \\
+\hline
+% \textbf{\colorbox{codeorange}{LLM Response}} \\
+ \textbf{\colorbox{codeorange}{LLM Response}}  & ...... \\
+& Rundll32.exe sysdm.cpl,EditEnvironmentVariables \\
+& Rundll32.exe shell32.dll,Options\_RunDLL 0 \\
+& Rundll32.exe shell32.dll,Options\_RunDLL 2 \\
+& Rundll32.exe shell32.dll,Options\_RunDLL 7 \\
+& ...... \\
+% \\
+\hline
+\end{tabularx}}
+\end{table*}
+
+\clearpage
+
+\subsubsection{Constraints Generation and Explanation}
+\label{prompt-cons-explain}
+
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:}  \colorbox{codegreen}{\{process\_behavior\_description\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{LightPeach}{\{explanation\}}} \\
+\hline
+\textbf{Role} & You are an expert in cybersecurity, proficient in understanding the legitimate behaviors of crucial Windows processes. You specialize in generating corresponding commands based on the behavior tree of the current process. \\
+\hline
+% &  \\
+ \textbf{Goal}  &  You are a seasoned security expert with a deep understanding of Windows system processes. \\
+& You will be presented with a \{process\_behavior\_description\}. \\
+& This description can convert a corresponding command that, when executed on a system, generates a log. \\
+& Analyze each log entry with a specific focus on: \\
+&   1 DLL meanings \\
+&    2 Registry key values meanings \\
+&   3 File names meanings  \\
+&    4 Process names meanings  \\
+& Relevance Levels: \\
+& 1 \{Essential\}   \\
+& 2 \{Strongly\_Related\}   \\
+& 3 \{Possibly\_Related\}  \\
+& 4 \{Unrelated\}   \\
+& For each log entry, categorize its relevance levels and provide an explanation for categories \{Essential\} 
+\\ 
+\hline
+\multirow{5}{*}{\textbf{Example}} 
+& Log Entry: RegQueryValue,hklm/system/currentcontrolset/control/scmconfig/*.\\
+& [RegQueryValue,hklm/system/currentcontrolset/control/scmconfig/*][Essential] [Explanation: The process frequently queries the Windows Registry to retrieve configuration or settings. The registry key path hklm/system/currentcontrolset/control/scmconfig* is associated with configurations related to the Service Control Manager (SCM).] \\
+& 3. Constructively self-criticize your big-picture behavior constantly. \\
+& 4. Ideally, behaviors should be generated that can be confirmed through system commands. \\
+% \\
+\hline
+\end{tabularx}
+
+\subsubsection{Temporal Constraint Validation}
+\label{prompt-init-temporal}
+
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{SoftRed}{\{log\_Sequence\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{LightPeach}{\{These two logs must appear in this specific order.\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\hline
+\textbf{Role} & You are a security expert and will receive logs from a certain process. Using your expertise, determine if there is a sequential dependency between these logs. If such a dependency exists, please identify it and explain the rationale behind this relationship. \\
+\hline
+% \\
+\textbf{Notes} &  Analyze each log entry individually and pinpoint logs that must appear in a specific order. Refrain from providing superfluous explanations. \\
+% \\ 
+\hline
+% \\
+\textbf{\colorbox{codeorange}{LLM Response}}  & [lsass.exe,Load,c:/windows/system32/lsasrv.dll, then Load, c:/windows/system32/samsrv.dll] \\
+& lsasrv.dll  serves as a core component of the LSA, and often needs to interact with SAM and samsrv.dll provides the essential interfaces and functions for interacting with the SAM database.
+\\
+\hline
+\end{tabularx}
+
+
+\clearpage
+\subsubsection{Cross-session Validation}
+\label{prompt-cross-validation}
+
+
+\begin{tabularx}{\textwidth}{|c|X|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Input:} \colorbox{SoftRed}{\{process\_behavior\}}for\colorbox{codegreen}{\{process\_name\}}} \\
+\multicolumn{2}{|c|}{\textbf{Output:} \colorbox{SoftRed}{\{yes\}}or\colorbox{codegreen}{\{No\}}} \\
+\hline
+\textbf{Role} & You are Agent1, a cybersecurity specialist with expertise in legitimate behaviors of key Windows processes. There are a total of 3 agents. \\
+\hline
+ % & 
+% \\
+ \textbf{Goal} & We aim to verify the legitimacy of a program's behavior.\\
+&  To achieve this, different LLM sessions will debate the behaviors, ensuring their accuracy and consistency. \\
+& For the provided behaviors, explain their legitimacy. Why do you believe these behaviors are inherent to the process in question? \\
+& You will also receive feedback from other LLM sessions. The format is: \\
+& Agent 1: "This behavior is inherent to process XX because..." \\
+& Agent 2: "This behavior..." \\
+& ...... \\
+% \\ 
+\hline
+
+\multirow{5}{*}{\textbf{Other Agent}} 
+& 1. You are Agent2, a cybersecurity specialist with expertise in legitimate behaviors of key Windows processes. There are a total of 3 agents.. \\
+& 2. You are Agent3, a cybersecurity specialist with expertise in legitimate behaviors of key Windows processes. There are a total of 3 agents. \\
+\hline
+
+\multirow{5}{*}{\textbf{Notes}} 
+& 1. Keep your answer as concise as possible, just yes or no, and follow it up with the reason why \\
+& 2. After engaging in several rounds of debate, if you are confident in your assessment, please respond with "yes". \\
+\hline
+
+% \\
+\textbf{\colorbox{codeorange}{LLM Response}}  & \colorbox{lightgray} {xxx} \\
+% \\
+\hline
+\end{tabularx}
+
+
+
+
